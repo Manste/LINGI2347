@@ -1,0 +1,60 @@
+Groupwork
+---------
+
+Procedure:
+1. Register your group on Moodle ("Groups for group work"). Two members per group.
+2. Download the pcap trace file corresponding to your group number from Teams.
+   You can uncompress it with gunzip.
+3. Take this text file and answer the questions below.
+4. Upload your solution (i.e. this text file with your answers filled in)
+   to Moodle ("Group work") by one member of your group by April 27.
+
+The pcap file contains the network traffic of a small company network with a few
+clients and servers. There are also hosts that access the company servers from
+outside (i.e. the Internet). The company network has a /16 address.
+
+Note that the pcap file does NOT contain useable packet payload and all IP addresses
+have been randomly generated. You should therefore focus on the packet headers.
+You are free to use whatever tool you like to analyze the pcap file. Wireshark
+might be a good choice if you are not familar with command line tools like tcpdump.
+
+===================================================================
+Questions
+===================================================================
+
+0) What is your group number and what are the UCLouvain (!) email addresses of your group members?
+   Group number: ...
+   Group member e-mails: ...
+
+a) What is the /16 address (e.g. 1.2.0.0) of the company network?
+   Your answer: ...
+
+b) There are 7 hosts in the company network. Write below their addresses
+   and their function, for example "1.2.3.4   Mail server".
+   Your answer:
+      IP1    function1
+      IP2    function2
+      ...
+      ...
+
+c) There are several hosts in the trace that try to attack the company.
+   However, there are also two external hosts that access the company's
+   servers in a (probably) legitimate way. Give the IP addresses of those
+   two benign hosts.
+   Your answer:
+      ...
+      ...
+
+d) There are two network attacks in the trace. Give for the first attack the
+   following information:
+
+   1. Short attack description. Just one line like "SQL injection against
+      database server" is enough, but don't be too generic (not "injection").
+   2. How many hosts participated in the attack
+   3. Start time of the attack (in seconds since begin of trace)
+   4. How many packets were exchanged in the attack (packets sent and received).
+
+e) Give the same information as in question d) for the second attack:
+   ...
+
+(The order of the attacks doesn't matter)

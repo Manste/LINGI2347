@@ -23,27 +23,31 @@ Questions
 ===================================================================
 
 0) What is your group number and what are the UCLouvain (!) email addresses of your group members?
-   Group number: ...
-   Group member e-mails: ...
+   Group number: 01
+   Group member e-mails: manuelle.ndamtang@student.uclouvain.be, axel.seunaekeuh@student.uclouvain.be
 
 a) What is the /16 address (e.g. 1.2.0.0) of the company network?
-   Your answer: ...
+   Your answer: 86.117.0.0
 
 b) There are 7 hosts in the company network. Write below their addresses
    and their function, for example "1.2.3.4   Mail server".
    Your answer:
-      IP1    function1
-      IP2    function2
-      ...
-      ...
+      86.117.47.220    DNS server
+      86.117.52.50     Web server
+      86.117.10.244    
+      86.117.121.229   DNS server
+      86.117.158.121   
+      86.117.13.205    Web server
+      86.117.236.18
 
 c) There are several hosts in the trace that try to attack the company.
    However, there are also two external hosts that access the company's
    servers in a (probably) legitimate way. Give the IP addresses of those
    two benign hosts.
    Your answer:
-      ...
-      ...
+	86.229.46.24
+	115.227.66.36
+	
 
 d) There are two network attacks in the trace. Give for the first attack the
    following information:
@@ -54,7 +58,13 @@ d) There are two network attacks in the trace. Give for the first attack the
    3. Start time of the attack (in seconds since begin of trace)
    4. How many packets were exchanged in the attack (packets sent and received).
 
+first attack:
+	hosts: 86.117.236.18
+
 e) Give the same information as in question d) for the second attack:
-   ...
+
+ 
+
+
 
 (The order of the attacks doesn't matter)

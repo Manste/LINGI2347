@@ -36,9 +36,9 @@ b) There are 7 hosts in the company network. Write below their addresses
 	86.117.52.50     Web server
 	86.117.10.244    Web server
 	86.117.121.229   DNS server
-	86.117.158.121   
+	86.117.158.121   Simple host
 	86.117.13.205    Web server
-	86.117.236.18
+	86.117.236.18	 Simple host
 
 c) There are several hosts in the trace that try to attack the company.
    However, there are also two external hosts that access the company's
@@ -47,8 +47,6 @@ c) There are several hosts in the trace that try to attack the company.
    Your answer:
 	86.229.46.24
 	115.227.66.36
-
-	
 
 d) There are two network attacks in the trace. Give for the first attack the
    following information:
@@ -60,17 +58,18 @@ d) There are two network attacks in the trace. Give for the first attack the
    4. How many packets were exchanged in the attack (packets sent and received).
 
 first attack:
-	1. Description: DNS Flood attack
-	2. Hosts: 
+	1. Description: DNS recursive attack against the web server (86.117.52.50)
+	2. Number of hosts: 79
+	3. The start time of the attack: 195.295 seconds
+	4. Number of packets: 116732
 
 e) Give the same information as in question d) for the second attack:
 
 second attack: 
-	1. Description: spoofed TCP reset packets
-	2. Hosts: 322 hosts
-	3. 
+	1. Description: TCP reset attack against web server (86.117.13.205)
+	2. Number of hosts: 363
+	3. The start time of the attack: 143.141 seconds
+	4. Number of packets: 4531
  
 
 
-
-(The order of the attacks doesn't matter)

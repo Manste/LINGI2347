@@ -3,6 +3,8 @@
 #include <time.h>
 #include <stdlib.h>
 
+const char typeflag[] = {'0', '1', '2', '3', '4', '5', '6', '7', 'D', 'K', 'L', 'M', 'N', 'S', 'V'};
+const char version[] = "00";
 
 struct tar_t
 {                              /* byte offset */
@@ -25,15 +27,15 @@ struct tar_t
     char padding[12];             /* 500 */
 };
 
+
 int main(int argc, char* argv[])
 {
     srand(time(NULL));   // Initialization of random number
 
-    const size_t size = 500;
-    char text[size+1];
-    make_random_string(size, text);
-    printf("%s", text);
-
+    const size_t size = 2000;
+    char *text = malloc(sizeof(char) * (size +1));
+    random_strings(size, text);
+    
     return 0;
 }
 
@@ -68,17 +70,60 @@ int random_number(int start, int end) {
     return result;
 }
 
-void make_random_string(size_t size, char *str) {
-    static char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.-#'?!:\\/\"{}<>$^´`£%éêîôûè§&[]¨*µ~€;ù+()_=@|";
-    
-    if(size) {
-        if (str) {
-            --size;
-            for (size_t n = 0; n < size; n+1) {
-                int key = rand() % (int) (sizeof(charset) - 1);
-                str[n] = charset[key];
+void random_strings(size_t length, char *randomString) { // const size_t length, supra
+
+    static char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    if (length) {
+        if (randomString) {
+            int l = (int) (sizeof(charset) -1);
+            for (int n = 0;n < length;n++) {
+                int key = rand() % l;          // per-iteration instantiation
+                randomString[n] = charset[key];
             }
-            str[size] = '\0';
+
+            randomString[length] = '\0';
         }
     }
+}
+
+int save_the_file(struct tar_t *archive, char *name) {
+    FILE *outfile;
+
+    //open file for writing
+    outfile = fopen(name, "w");
+    if(outfile == NULL){
+        fprintf(stderr, "\nError open file\n");
+        exit(1);
+    }
+    
+    fwrite(&archive, sizeof(struct tar_t), 1, outfile);
+
+    if(fwrite != 0)
+        printf("write_header_old_tar_null Written sucessfully");
+    
+    return 0;
+}
+
+int write_input_entries(int fd, struct tar_t ** archive, struct tar_t ** head, char * files[], int * offset, size_t filecount){
+    struct tar_t ** input = archive;
+    for (int i = 0; i < filecount; i++)
+    {
+        if ()
+    }
+    
+    return 0;
+}
+
+int write_tar_format(struct tar_t * input, char * filename) {
+    if (!input)
+    {
+        ERROR("Bad input");
+    }
+    
+    
+}
+
+int rename_working_files() {
+    return 0;
 }

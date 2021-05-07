@@ -2,11 +2,23 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
-const char typeflag[] = {'0', '1', '2', '3', '4', '5', '6', '7', 'D', 'K', 'L', 'M', 'N', 'S', 'V'};
-const char version[] = "00";
+#define BLOCKSIZE       512
+#define BLOCKING_FACTOR 20
+#define RECORDSIZE      10240
 
-struct tar_t
+#define TMAGIC   "ustar"        /* ustar and a null */
+#define TMAGLEN  6
+#define TVERSION "00"           /* 00 and no null */
+#define TVERSLEN 2
+
+typedef struct tar_t tar_t;
+typedef struct tar_header tar_header;
+
+struct tar_header
 {                              /* byte offset */
     char name[100];               /*   0 */
     char mode[8];                 /* 100 */
@@ -27,19 +39,36 @@ struct tar_t
     char padding[12];             /* 500 */
 };
 
+struct tar_t {
+    int (*read)(tar_t *tar, void *data, unsigned size);
+    int (*write)(tar_t *tar, const void *data, unsigned size);
+    int (*seek)(tar_t *tar, unsigned pos);
+    int (*close)(tar_t *tar);
+    void *stream;
+    unsigned pos;
+    unsigned remaining_data;
+    unsigned last_header;
+};
+
+const char typeflag[] = {'0', '1', '2', '3', '4', '5', '6', '7', 'D', 'K', 'L', 'M', 'N', 'S', 'V'};
+const int mode[] = {04000, 02000, 01000, 00400, 00200, 00100, 00040, 00020, 00010, 00004, 00002, 00001};
 
 int main(int argc, char* argv[])
 {
     srand(time(NULL));   // Initialization of random number
 
     const size_t size = 2000;
-    char *text = malloc(sizeof(char) * (size +1));
-    random_strings(size, text);
-    
+
+    struct tar_header tar;
+    char *text1 = malloc(sizeof(char) * (size +1));
+    random_strings(size, text1);
+    char *text2 = malloc(sizeof(char) * (size +1));
+    random_strings(size, text2);
+        
     return 0;
 }
 
-unsigned int calculate_checksum(struct tar_t* entry){
+unsigned int calculate_checksum(struct tar_header* entry){
      memset(entry->chksum, ' ', 8);
     
     unsigned int check = 0;
@@ -87,43 +116,52 @@ void random_strings(size_t length, char *randomString) { // const size_t length,
     }
 }
 
-int save_the_file(struct tar_t *archive, char *name) {
-    FILE *outfile;
+static int write_file(tar_t *tar, void *data, size_t size) {
+    size_t res = fwrite(data, 1, size, tar->stream);
+    return (size == res) ? 0 : -1;
+}
 
-    //open file for writing
-    outfile = fopen(name, "w");
-    if(outfile == NULL){
-        fprintf(stderr, "\nError open file\n");
-        exit(1);
-    }
-    
-    fwrite(&archive, sizeof(struct tar_t), 1, outfile);
+static int read_file(tar_t *tar, void *data, size_t size) {
+    size_t res = fread(data, 1, size, tar->stream);
+    return (size == res) ? 0 : -1;
+}
 
-    if(fwrite != 0)
-        printf("write_header_old_tar_null Written sucessfully");
-    
+static int seek_file(tar_t *tar, int offset) {
+    size_t res = fseek(tar->stream, offset, SEEK_SET);
+    return res;
+}
+
+static int close_file(tar_t *tar) {
+    return fclose(tar->stream); 
+}
+
+int open_tar(tar_t *tar, char *archive_name) {
+    tar_header *head;
+
+    memset(tar, 0, sizeof(*tar));
+    tar->stream = fopen(archive_name, "wb");
     return 0;
 }
 
-int write_input_entries(int fd, struct tar_t ** archive, struct tar_t ** head, char * files[], int * offset, size_t filecount){
-    struct tar_t ** input = archive;
-    for (int i = 0; i < filecount; i++)
-    {
-        if ()
-    }
-    
+int write_tar_header (tar_header *tar, char *archive_name) {
+    struct stat st;
+
     return 0;
 }
 
-int write_tar_format(struct tar_t * input, char * filename) {
-    if (!input)
-    {
-        ERROR("Bad input");
-    }
-    
-    
+int write_tar_data (tar_t *tar, char *name, unsigned size) {
+    tar_header header;
+    memset(&header, 0, sizeof(header));
+    strcpy(header.name, name);
+    header.size = size;
+
+    return 0;
 }
 
-int rename_working_files() {
+int write_file_header (tar_header *tar, char *archive_name) {
+    return 0;
+}
+
+int close_file (tar_header *tar, char *archive_name) {
     return 0;
 }

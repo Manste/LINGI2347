@@ -85,17 +85,7 @@ int main(int argc, char* argv[])
 {
     srand(time(NULL));   // Initialization of random number
 
-    const size_t size = 2000;
-    char *text = malloc(sizeof(char) * (size +1));
-    random_strings(size, text);
-    
-    struct tar_t tar;
-
-    prepare_tar(&tar, "archive.tar");
-    tar_write_file_header(&tar, "test.txt", strlen(text), 0664, REGTYPE);
-    tar_write_data(&tar, text, strlen(text));
-    tar_finalize(&tar);
-    return 0;
+    create_correct_tar_files();
 }
 
 unsigned int calculate_checksum(struct tar_header * entry){
@@ -146,12 +136,12 @@ void random_strings(size_t length, char *randomString) { // const size_t length,
     }
 }
 
-int prepare_tar(struct tar_t *tar, char *filename){
+void prepare_tar(struct tar_t *tar, char *filename){
     char mode[] = "wb";
     tar->stream = fopen(filename, mode);
 }
 
-int tar_write_file_header(struct tar_t *tar, char *name, unsigned size, mode_t mode, unsigned type){
+int tar_write_header(struct tar_t *tar, char *name, unsigned size, mode_t mode, unsigned type){
     struct tar_header hdr;
 	struct passwd *pw = getpwuid(getuid());
 	struct group *gr = getgrgid(getgid());
@@ -227,3 +217,41 @@ int write_null_bytes(struct tar_t *tar, int n) {
     }
     return 0;
 } 
+
+int create_correct_tar_files(){
+
+    const size_t size = 2000;
+    char *text = malloc(sizeof(char) * (size +1));
+    random_strings(size, text);
+    
+    struct tar_t tar;
+
+    prepare_tar(&tar, "archive.tar");
+    tar_write_header(&tar, "test.txt", strlen(text), 0664, REGTYPE);
+    tar_write_data(&tar, text, strlen(text));
+    tar_finalize(&tar);
+}
+
+int if_512_bytes() {
+    const size_t size = 2000;
+    char *text = malloc(sizeof(char) * (size +1));
+    random_strings(size, text);
+    
+    struct tar_t tar;
+
+    prepare_tar(&tar, "archive.tar");
+    tar_write_header(&tar, "test.txt", strlen(text), 0664, REGTYPE);
+    tar_write_data(&tar, text, strlen(text));
+}
+
+int if_data_failed() {
+    const size_t size = 2000;
+    char *text = malloc(sizeof(char) * (size +1));
+    random_strings(size, text);
+    
+    struct tar_t tar;
+
+    prepare_tar(&tar, "archive.tar");
+    tar_write_header(&tar, "test.txt", strlen(text), 0664, REGTYPE);
+    tar_finalize(&tar);
+}

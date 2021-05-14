@@ -1,9 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/sysmacros.h>
+#include <unistd.h>
 #include <grp.h>
 #include <pwd.h>
 #include <time.h>
@@ -49,7 +49,7 @@
 #define TOWRITE  00002          /* write by other */
 #define TOEXEC   00001          /* execute/search by other */
 
-const char typeflag[] = {'0', '1', '2', '3', '4', '5', '6', '7', 'x', 'g'};
+const unsigned typeflags[] = {REGTYPE, AREGTYPE, LNKTYPE, SYMTYPE, CHRTYPE, BLKTYPE, DIRTYPE, FIFOTYPE, CONTTYPE, XHDTYPE, XGLTYPE};
 const mode_t modes[] = {04000, 02000, 01000, 00400, 00200, 00100, 00040, 00020, 00010, 00004, 00002, 00001};
 
 struct tar_header {               /* byte offset */
@@ -85,9 +85,90 @@ int main(int argc, char* argv[])
 {
     srand(time(NULL));   // Initialization of random number
 
-    create_correct_tar_files();
+    if (argc < 2){
+        printf("Failure: There are no arguments\n");
+        return -1;
+    }
+    int rv = 0;
+    char cmd[51];
+    strncpy(cmd, argv[1], 25);
+    cmd[26] = '\0';
+    int nbfound = 0, nbmax = 3, cpt = 0;
+    while (nbfound <=5 & cpt < nbmax) {
+        char *id;
+        char archive[15];
+        snprintf(archive, 15, "archive%d.tar", cpt);
+        if (cpt == 1) {
+            if_512_bytes(archive);
+        }
+        else if (cpt == 0)
+        {
+            if_data_failed(archive);
+        }
+        else if (cpt == 2) 
+        {
+            create_correct_tar_files(archive, DIRTYPE, 0664);
+        }
+        
+        
+        char for_command[strlen(archive) + 1];
+
+        strcpy(for_command, " ");
+        strcat(for_command, archive);
+        strncat(cmd, for_command, 25);
+        char buf[37];
+        FILE *fp;
+
+        if ((fp = popen(cmd, "r")) == NULL) {
+            printf("Error opening pipe!\n");
+            return -1;
+        }
+
+        if(fgets(buf, 37, fp) == NULL) {
+            printf("No output\n");
+            goto finally;
+        }
+        if(strstr(buf, "*** The program has crashed ***\n")) {
+            nbfound++;
+            char new_name[30];
+            strcpy(new_name, "success_");
+            strcat(new_name, archive);
+
+            // success file already exists, remove it
+            if( access( new_name, F_OK ) == 0 ) {
+                remove(new_name);
+            } 
+            // copy the successful file into another file
+            FILE *fptr1, *fptr2;
+            fptr1 = fopen(archive, "r");
+            fptr2 = fopen(new_name, "w");
+            char c = fgetc(fptr1);
+            while (c != EOF ) {
+                fputc(c, fptr2);
+                c = fgetc(fptr1);
+            }
+            fclose(fptr1);
+            fclose(fptr2); 
+            printf("*** The program has crashed with ***\n");  
+            goto finally;
+        } else {
+            printf("Crash message\n");
+            rv = 1;
+            goto finally;
+        }
+        finally:
+        if(pclose(fp) == -1) {
+            printf("Command not found\n");
+            rv = -1;
+        }
+        
+        cpt++;
+    }
+    printf("We found  %d crashes\n", nbfound);
+    return rv;
 }
 
+// To calculate the checksum
 unsigned int calculate_checksum(struct tar_header * entry){
      memset(entry->chksum, ' ', 8);
     
@@ -104,6 +185,7 @@ unsigned int calculate_checksum(struct tar_header * entry){
     return check;
 }
 
+// To generate random integer: This is useful to generate random string 
 int random_number(int start, int end) {
     int result = 0;
     int min_num = 0;
@@ -119,6 +201,7 @@ int random_number(int start, int end) {
     return result;
 }
 
+// To generate random string for our text-file
 void random_strings(size_t length, char *randomString) { // const size_t length, supra
 
     static char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -130,18 +213,27 @@ void random_strings(size_t length, char *randomString) { // const size_t length,
                 int key = rand() % l;          // per-iteration instantiation
                 randomString[n] = charset[key];
             }
-
             randomString[length] = '\0';
         }
     }
 }
 
+/* 
+    To open the stream file
+    *tar: the struct data used to save the structure of the tar file
+    *filename: the filename of the archive
+*/
 void prepare_tar(struct tar_t *tar, char *filename){
     char mode[] = "wb";
     tar->stream = fopen(filename, mode);
 }
 
-int tar_write_header(struct tar_t *tar, char *name, unsigned size, mode_t mode, unsigned type){
+
+/*
+    This function elaborate the content of the archive header, complete its content and save it in the stream file.
+    mode: the mode used during the initiation of the 
+*/
+int tar_write_header(struct tar_t *tar, char *name, unsigned size, mode_t mode, char type){
     struct tar_header hdr;
 	struct passwd *pw = getpwuid(getuid());
 	struct group *gr = getgrgid(getgid());
@@ -171,7 +263,7 @@ int tar_write_header(struct tar_t *tar, char *name, unsigned size, mode_t mode, 
 		snprintf(hdr.devmajor,  8, "%07o", 0U);
 		snprintf(hdr.devminor,  8, "%07o", 0U);
 	} 
-    else if(not_in_array(type, typeflag) ) {
+    else if(not_in_array(type, typeflags) ) {
         printf("Failure: unable to determine the filetype\n");
         return -1;
     }
@@ -181,6 +273,7 @@ int tar_write_header(struct tar_t *tar, char *name, unsigned size, mode_t mode, 
     return 0;
 }
 
+// To check if an array contains a value
 int not_in_array(unsigned *element, unsigned arr[]) {
     int n = sizeof(arr)/sizeof(mode_t);
     for (int i = 0; i < n; i++) {
@@ -191,6 +284,7 @@ int not_in_array(unsigned *element, unsigned arr[]) {
     return 1;
 }
 
+// Write the value or the content of a file
 int tar_write_data(struct tar_t *tar, void *data, unsigned size) {
     fwrite(data, size, 1, tar->stream); 
     tar->remaining_data -= size;
@@ -218,7 +312,15 @@ int write_null_bytes(struct tar_t *tar, int n) {
     return 0;
 } 
 
-int create_correct_tar_files(){
+void removeSpaces(char *str) {
+    int count = 0;
+    for (int i = 0; str[i]; i++)
+        if (str[i] != ' ')
+            str[count++] = str[i];
+    str[count] = '\0';
+}
+
+void create_correct_tar_files(char *name, unsigned typeflag, unsigned mode){
 
     const size_t size = 2000;
     char *text = malloc(sizeof(char) * (size +1));
@@ -226,32 +328,32 @@ int create_correct_tar_files(){
     
     struct tar_t tar;
 
-    prepare_tar(&tar, "archive.tar");
-    tar_write_header(&tar, "test.txt", strlen(text), 0664, REGTYPE);
+    prepare_tar(&tar, name);
+    tar_write_header(&tar, "test.txt", strlen(text), mode, typeflag);
     tar_write_data(&tar, text, strlen(text));
     tar_finalize(&tar);
 }
 
-int if_512_bytes() {
+void if_512_bytes(char *name) {
     const size_t size = 2000;
     char *text = malloc(sizeof(char) * (size +1));
     random_strings(size, text);
     
     struct tar_t tar;
 
-    prepare_tar(&tar, "archive.tar");
+    prepare_tar(&tar, name);
     tar_write_header(&tar, "test.txt", strlen(text), 0664, REGTYPE);
     tar_write_data(&tar, text, strlen(text));
 }
 
-int if_data_failed() {
+void if_data_failed(char *name) {
     const size_t size = 2000;
     char *text = malloc(sizeof(char) * (size +1));
     random_strings(size, text);
     
     struct tar_t tar;
 
-    prepare_tar(&tar, "archive.tar");
+    prepare_tar(&tar, name);
     tar_write_header(&tar, "test.txt", strlen(text), 0664, REGTYPE);
     tar_finalize(&tar);
 }

@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
             } 
             else if (cpt = 268) {
                 // To try using wronly pointer and addresses for header
-                test(archive);
+                create_tar_with_wrong_ptr(archive);
             }
             else {
                 // Try with many text file in the archive file
@@ -305,7 +305,7 @@ int tar_write_header(struct tar_t *tar, struct tar_header hdr, char *name, unsig
 
     -> char *name: the name of the archive file
 */
-void test(char * name) {
+void create_tar_with_wrong_ptr(char * name) {
     const size_t size = 2000;
     char *text = malloc(sizeof(char) * (size +1));
     random_strings(size, text);

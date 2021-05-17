@@ -453,7 +453,7 @@ void create_correct_tar_multiple_files(char *name, unsigned typeflag, unsigned m
         random_strings(size, text);
 
         char *text_file = malloc(15);
-        snprintf(text_file, 22, "text%d.txt", i);
+        snprintf(text_file, 15, "text%d.txt", i);
         tar_write_header(&tar, hdr, text_file, strlen(text), mode, typeflag);
         tar_write_data(&tar, text, strlen(text));
     }

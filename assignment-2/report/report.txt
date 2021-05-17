@@ -10,7 +10,7 @@ Genaration-based Fuzzer
 The project contains src sub folders with:
 
 -> With a Makefile: executing the code which compile the fuzzer.c file. Note that the Makefile accept a extractor parameter and execute it with the fuzzer after compile its source code.
-The way to execute it, if you want to assign the extractor variable the path to the extractor file: make extractor=./extractor
+The way to execute it, if you want to assign the extractor variable the path to the extractor file: make extractor=./extractor. If it's not the case, the simple command "make" is enough.
 -> fuzzer.c : source code of the generation-based fuzzer
 -> fuzzer: The compiled version of fuzzer.c
 -> extractor: The extractor file given for the test purpose

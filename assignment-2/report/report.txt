@@ -33,3 +33,5 @@ There are five main ways that our fuzzer used to generated the archive file that
 -> create a archive file using wrongly the pointer of the structure of archive header
 -> create a archive file with mutiples text files
 -> create an archive file for all the different possible archive typeflags and also using different string as typeflags with are generated randomly.
+
+To make the fuzzer quicker, we are creating fork proccesses. Each of them, execute the test for each archive file.

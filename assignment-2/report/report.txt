@@ -1,0 +1,35 @@
+Group 1
+manuelle.ndamtang@student.uclouvain.be,
+axel.seunaekeuh@student.uclouvain.be
+
+
+*****************
+Genaration-based Fuzzer
+*****************
+
+The project contains src sub folders with:
+
+-> With a Makefile: executing the code which compile the fuzzer.c file. Note that the Makefile may accept a extractor parameter but will do nothing with it.
+-> fuzzer.c : source code of the generation-based fuzzer
+-> fuzzer: The compiled version of fuzzer.c
+-> extractor: The extractor file given for the test purpose
+-> success_archive***.tar: The tar file crashing the extractor.
+
+To execute the project, you have to go to src:
+-> execute the makefile "make"
+-> Then used the compiled file and the extractor to get archive file crashing the extractor "./fuzzer ./path_to_extractor"
+Note: every succeed files are rename success_archive***.tar
+
+
+
+************************************
+Description of the fuzzer's contents
+************************************
+
+There are five main ways that our fuzzer used to generated the archive file that may crashed the extractor:
+
+-> create a archive file without writting the adding at the end of the archive file two 512-byte blocks filled with binary zeros as an end-of-file marker.
+-> create a archive file specifying that there exist a text file but we don't save the data corresponding to that text-file
+-> create a archive file using wrongly the pointer of the structure of archive header
+-> create a archive file with mutiples text files
+-> create an archive file for all the different possible archive typeflags and also using different string as typeflags with are generated randomly.

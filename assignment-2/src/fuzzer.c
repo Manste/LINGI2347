@@ -56,12 +56,13 @@ struct tar_header {               /* byte offset */
     char padding[12];             /* 500 */
 };
 
-// The struct save the stream writting the archive file
+//
 struct tar_t 
 {
-    unsigned pos; // The position where we begin to complete missing information 
-    unsigned remaining_data; // The number missing bytes while writting the file
-    void * stream; // The stream where we write the archive file
+    unsigned pos;
+    unsigned remaining_data;
+    unsigned last_header;
+    void * stream;
 };
 
 
@@ -111,11 +112,11 @@ int main(int argc, char* argv[])
             } 
             else if (cpt = 268) {
                 // To try using wronly pointer and addresses for header
-                create_tar_with_wrong_ptr(archive);
+                test(archive);
             }
             else {
                 // Try with many text file in the archive file
-                create_correct_tar_multiple_files(archive, REGTYPE, 0664, cpt);
+                create_correct_tar_multiple_files(archive, DIRTYPE, 0664, cpt);
             }
             
             char for_command[strlen(archive) + 1];
@@ -125,10 +126,12 @@ int main(int argc, char* argv[])
             strncat(cmd, for_command, 25);
             char buf[33];
             FILE *fp;
+
             if ((fp = popen(cmd, "r")) == NULL) {
                 printf("Error opening pipe!\n");
                 return -1;
             }
+
             if(fgets(buf, sizeof buf, fp) == NULL) {
                 printf("No output\n");
                 goto finally;
@@ -302,7 +305,7 @@ int tar_write_header(struct tar_t *tar, struct tar_header hdr, char *name, unsig
 
     -> char *name: the name of the archive file
 */
-void create_tar_with_wrong_ptr(char * name) {
+void test(char * name) {
     const size_t size = 2000;
     char *text = malloc(sizeof(char) * (size +1));
     random_strings(size, text);
@@ -391,7 +394,7 @@ void create_correct_tar_files(char *name, unsigned typeflag, unsigned mode){
 }
 
 /*
-    This function create an archive file without adding at the end of the archive file 
+    This function create an archive file without completing adding at the end of the archive file 
     two 512-byte blocks filled with binary zeros as an end-of-file marker.
 
     -> char *name: the name of the archive file
@@ -450,7 +453,7 @@ void create_correct_tar_multiple_files(char *name, unsigned typeflag, unsigned m
         random_strings(size, text);
 
         char *text_file = malloc(15);
-        snprintf(text_file, 15, "text%d.txt", i);
+        snprintf(text_file, 22, "text%d.txt", i);
         tar_write_header(&tar, hdr, text_file, strlen(text), mode, typeflag);
         tar_write_data(&tar, text, strlen(text));
     }
@@ -460,7 +463,7 @@ void create_correct_tar_multiple_files(char *name, unsigned typeflag, unsigned m
 /*
     Here we are only complete the tar-header
 
-    -> unsigned mode: the mode used during the initiation of the tar file
+    > unsigned mode: the mode used during the initiation of the tar file
     -> unsigned size: the size of the file
     -> unsigned type: the type of the tar_header
     -> unsigned *name: the name of the tar file
